@@ -1463,20 +1463,61 @@ const ProductsPage4 = () => {
                   </span>
                 )}
               </p>
-              <div className="relative">
-                <select
-                  value={filters.sortBy}
-                  onChange={(e) => dispatch(setSortBy(e.target.value))}
-                  className="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              {/* Sorting Dropdown */}
+              <div className="dropdown dropdown-end">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-sm bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-normal hover:bg-gray-50"
                 >
-                  <option value="default">Sort</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                  <option value="rating-desc">Top Rated</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  {filters.sortBy === "default"
+                    ? "Sort by"
+                    : filters.sortBy === "price-asc"
+                      ? "Price: Low to High"
+                      : filters.sortBy === "price-desc"
+                        ? "Price: High to Low"
+                        : filters.sortBy === "rating-desc"
+                          ? "Top Rated"
+                          : "Sort by"}
                   <Icons.ChevronDown />
                 </div>
+                <ul
+                  tabIndex={-1}
+                  className="dropdown-content menu bg-white rounded-box z-1 w-52 p-2 shadow-lg border border-gray-200"
+                >
+                  <li>
+                    <a
+                      className={`${filters.sortBy === "default" ? "active bg-blue-50 text-blue-600" : ""}`}
+                      onClick={() => dispatch(setSortBy("default"))}
+                    >
+                      Default
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      className={`${filters.sortBy === "price-asc" ? "active bg-blue-50 text-blue-600" : ""}`}
+                      onClick={() => dispatch(setSortBy("price-asc"))}
+                    >
+                      Price: Low to High
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      className={`${filters.sortBy === "price-desc" ? "active bg-blue-50 text-blue-600" : ""}`}
+                      onClick={() => dispatch(setSortBy("price-desc"))}
+                    >
+                      Price: High to Low
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      className={`${filters.sortBy === "rating-desc" ? "active bg-blue-50 text-blue-600" : ""}`}
+                      onClick={() => dispatch(setSortBy("rating-desc"))}
+                    >
+                      Top Rated
+                    </a>
+                  </li>
+                </ul>
               </div>
             </div>
 
