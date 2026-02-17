@@ -1,4 +1,4 @@
-import ProductsPage3 from "./project3/pages/ProductsPage3";
+//import ProductsPage3 from "./project3/pages/ProductsPage3";
 import ProductsPage4 from "./project3/pages/ProductsPage4";
 
 const App = () => {
