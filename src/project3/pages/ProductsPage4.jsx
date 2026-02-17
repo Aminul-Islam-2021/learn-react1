@@ -822,13 +822,6 @@
 
 // export default ProductsPage4;
 
-
-
-
-
-
-
-
 // ProductsPage.jsx
 // import React, { useEffect, useState, useMemo } from "react";
 // import { useDispatch, useSelector } from "react-redux";
@@ -1643,13 +1636,6 @@
 
 // export default ProductsPage4;
 
-
-
-
-
-
-
-
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -1675,7 +1661,39 @@ import Pagination from "../components/Pagination";
 import LoadingSkeleton from "../components/LoadingSkeleton";
 import useDebounce from "../hooks/useDebounce";
 
-const ProductsPage = () => {
+// Add this to your Icons component
+const Icons = {
+  Search: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+  ),
+  Filter: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+    </svg>
+  ),
+  Close: () => (  // ✅ Add this
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  ),
+  Star: ({ filled }) => (
+    <svg className={`w-3 h-3 ${filled ? "text-yellow-400" : "text-gray-300"}`} fill="currentColor" viewBox="0 0 20 20">
+      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+  ),
+  ChevronDown: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  ),
+};
+
+
+
+
+const ProductsPage4 = () => {
   const dispatch = useDispatch();
   const { processedProducts, rawProducts, loading, error, categories } =
     useSelector((state) => state.products);
@@ -1689,23 +1707,45 @@ const ProductsPage = () => {
 
   // Get category-specific ranges
   const categoryRanges = useMemo(() => {
-    if (!rawProducts.length) return { price: { min: 0, max: 1000 }, ratings: [1, 2, 3, 4, 5] };
-    
-    const filtered = filters.category === 'all' 
-      ? rawProducts 
-      : rawProducts.filter(p => p.category === filters.category);
-    
-    const prices = filtered.map(p => p.price);
-    const ratings = [...new Set(filtered.map(p => Math.floor(p.rating)))].sort((a, b) => a - b);
-    
+    if (!rawProducts.length)
+      return { price: { min: 0, max: 1000 }, ratings: [1, 2, 3, 4, 5] };
+
+    const filtered =
+      filters.category === "all"
+        ? rawProducts
+        : rawProducts.filter((p) => p.category === filters.category);
+
+    const prices = filtered.map((p) => p.price);
+    const ratings = [
+      ...new Set(filtered.map((p) => Math.floor(p.rating))),
+    ].sort((a, b) => a - b);
+
     return {
       price: {
         min: Math.min(...prices),
-        max: Math.max(...prices)
+        max: Math.max(...prices),
       },
-      ratings: ratings.length ? ratings : [1, 2, 3, 4, 5]
+      ratings: ratings.length ? ratings : [1, 2, 3, 4, 5],
     };
   }, [rawProducts, filters.category]);
+
+  // Add temp filters state for mobile
+  const [tempFilters, setTempFilters] = useState({
+    category: filters.category,
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
+    minRating: filters.minRating,
+  });
+
+  // Update temp filters when actual filters change (when opening drawer)
+  useEffect(() => {
+    setTempFilters({
+      category: filters.category,
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice,
+      minRating: filters.minRating,
+    });
+  }, [filters, mobileFiltersOpen]); // Update when opening drawer or filters change
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -1736,7 +1776,7 @@ const ProductsPage = () => {
 
   const paginatedProducts = processedProducts.slice(
     (filters.page - 1) * filters.limit,
-    filters.page * filters.limit
+    filters.page * filters.limit,
   );
 
   const totalPages = Math.ceil(processedProducts.length / filters.limit);
@@ -1751,12 +1791,16 @@ const ProductsPage = () => {
     setSearchInput("");
   };
 
-  const hasActiveFilters = filters.category !== "all" || 
-    filters.minPrice || filters.maxPrice || 
-    filters.minRating > 0 || filters.searchQuery;
+  const hasActiveFilters =
+    filters.category !== "all" ||
+    filters.minPrice ||
+    filters.maxPrice ||
+    filters.minRating > 0 ||
+    filters.searchQuery;
 
   if (loading && rawProducts.length === 0) return <LoadingSkeleton />;
-  if (error) return <div className="text-center py-12 text-red-500">{error}</div>;
+  if (error)
+    return <div className="text-center py-12 text-red-500">{error}</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1775,8 +1819,18 @@ const ProductsPage = () => {
               onClick={() => setMobileFiltersOpen(true)}
               className="lg:hidden p-2 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
           </div>
@@ -1800,30 +1854,204 @@ const ProductsPage = () => {
           </aside>
 
           {/* Mobile Sidebar */}
+          {/* Mobile Filters Drawer with Apply Button */}
           {mobileFiltersOpen && (
             <>
-              <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setMobileFiltersOpen(false)} />
-              <div className="fixed left-0 top-0 h-full w-72 bg-white z-50 overflow-y-auto p-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="font-semibold">Filters</h2>
-                  <button onClick={() => setMobileFiltersOpen(false)}>✕</button>
+              <div
+                className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                onClick={() => setMobileFiltersOpen(false)}
+              />
+              <div className="fixed left-0 top-0 h-full w-80 bg-white z-50 lg:hidden flex flex-col">
+                {/* Header */}
+                <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                  <h2 className="font-semibold text-lg">Filters</h2>
+                  <button
+                    onClick={() => setMobileFiltersOpen(false)}
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                  >
+                    <Icons.Close />
+                  </button>
                 </div>
-                <FiltersSidebar
-                  categories={categories}
-                  filters={filters}
-                  categoryRanges={categoryRanges}
-                  onCategoryChange={(cat) => {
-                    dispatch(setCategory(cat));
-                    setMobileFiltersOpen(false);
-                  }}
-                  onPriceChange={(range) => dispatch(setPriceRange(range))}
-                  onRatingChange={(rating) => {
-                    dispatch(setMinRating(rating));
-                    setMobileFiltersOpen(false);
-                  }}
-                  onClearFilters={handleClearFilters}
-                  showClearButton={hasActiveFilters}
-                />
+
+                {/* Filter Content - Scrollable */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                  {/* Categories */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-3">
+                      Category
+                    </p>
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="mobile-category"
+                          checked={tempFilters.category === "all"}
+                          onChange={() =>
+                            setTempFilters((prev) => ({
+                              ...prev,
+                              category: "all",
+                            }))
+                          }
+                          className="w-4 h-4 text-blue-500"
+                        />
+                        <span className="text-sm">All Categories</span>
+                      </label>
+                      {categories.map((cat) => (
+                        <label
+                          key={cat.slug}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+                        >
+                          <input
+                            type="radio"
+                            name="mobile-category"
+                            checked={tempFilters.category === cat.slug}
+                            onChange={() =>
+                              setTempFilters((prev) => ({
+                                ...prev,
+                                category: cat.slug,
+                              }))
+                            }
+                            className="w-4 h-4 text-blue-500"
+                          />
+                          <span className="text-sm capitalize">{cat.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Price Range */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-3">
+                      Price Range
+                    </p>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>Min: ${categoryRanges.price.min}</span>
+                        <span>Max: ${categoryRanges.price.max}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={categoryRanges.price.min}
+                        max={categoryRanges.price.max}
+                        value={tempFilters.maxPrice || categoryRanges.price.max}
+                        onChange={(e) =>
+                          setTempFilters((prev) => ({
+                            ...prev,
+                            maxPrice: Number(e.target.value),
+                          }))
+                        }
+                        className="w-full accent-blue-500"
+                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          placeholder="Min"
+                          value={tempFilters.minPrice || ""}
+                          onChange={(e) =>
+                            setTempFilters((prev) => ({
+                              ...prev,
+                              minPrice: e.target.value
+                                ? Number(e.target.value)
+                                : null,
+                            }))
+                          }
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                          min={categoryRanges.price.min}
+                          max={categoryRanges.price.max}
+                        />
+                        <input
+                          type="number"
+                          placeholder="Max"
+                          value={tempFilters.maxPrice || ""}
+                          onChange={(e) =>
+                            setTempFilters((prev) => ({
+                              ...prev,
+                              maxPrice: e.target.value
+                                ? Number(e.target.value)
+                                : null,
+                            }))
+                          }
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                          min={categoryRanges.price.min}
+                          max={categoryRanges.price.max}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rating */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-3">
+                      Rating
+                    </p>
+                    <div className="rating rating-md">
+                      {[1, 2, 3, 4, 5]
+                        .filter((r) => r <= Math.max(...categoryRanges.ratings))
+                        .map((rating) => (
+                          <input
+                            key={rating}
+                            type="radio"
+                            name="mobile-rating"
+                            className="mask mask-star-2 bg-green-500"
+                            checked={tempFilters.minRating === rating}
+                            onChange={() =>
+                              setTempFilters((prev) => ({
+                                ...prev,
+                                minRating:
+                                  prev.minRating === rating ? 0 : rating,
+                              }))
+                            }
+                          />
+                        ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Apply Filters Button - Fixed at Bottom */}
+                <div className="border-t border-gray-200 p-4 bg-white">
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        // Reset temp filters to current actual filters
+                        setTempFilters({
+                          category: filters.category,
+                          minPrice: filters.minPrice,
+                          maxPrice: filters.maxPrice,
+                          minRating: filters.minRating,
+                        });
+                      }}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      Reset
+                    </button>
+                    <button
+                      onClick={() => {
+                        // Apply all filters at once and close drawer
+                        if (tempFilters.category !== filters.category) {
+                          dispatch(setCategory(tempFilters.category));
+                        }
+                        if (
+                          tempFilters.minPrice !== filters.minPrice ||
+                          tempFilters.maxPrice !== filters.maxPrice
+                        ) {
+                          dispatch(
+                            setPriceRange({
+                              min: tempFilters.minPrice,
+                              max: tempFilters.maxPrice,
+                            }),
+                          );
+                        }
+                        if (tempFilters.minRating !== filters.minRating) {
+                          dispatch(setMinRating(tempFilters.minRating));
+                        }
+                        setMobileFiltersOpen(false);
+                      }}
+                      className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+                    >
+                      Apply Filters
+                    </button>
+                  </div>
+                </div>
               </div>
             </>
           )}
@@ -1832,10 +2060,18 @@ const ProductsPage = () => {
           <main className="flex-1">
             <div className="flex justify-between items-center mb-4">
               <p className="text-sm text-gray-600">
-                Showing {paginatedProducts.length} of {processedProducts.length} products
-                {filters.searchQuery && <span className="ml-2 text-blue-500">for "{filters.searchQuery}"</span>}
+                Showing {paginatedProducts.length} of {processedProducts.length}{" "}
+                products
+                {filters.searchQuery && (
+                  <span className="ml-2 text-blue-500">
+                    for "{filters.searchQuery}"
+                  </span>
+                )}
               </p>
-              <SortDropdown currentSort={filters.sortBy} onSortChange={(sort) => dispatch(setSortBy(sort))} />
+              <SortDropdown
+                currentSort={filters.sortBy}
+                onSortChange={(sort) => dispatch(setSortBy(sort))}
+              />
             </div>
 
             {paginatedProducts.length > 0 ? (
@@ -1853,8 +2089,13 @@ const ProductsPage = () => {
               </>
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-sm mb-3">No products match your filters</p>
-                <button onClick={handleClearFilters} className="px-4 py-2 bg-blue-500 text-white rounded-lg">
+                <p className="text-gray-500 text-sm mb-3">
+                  No products match your filters
+                </p>
+                <button
+                  onClick={handleClearFilters}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                >
                   Clear Filters
                 </button>
               </div>
@@ -1866,4 +2107,4 @@ const ProductsPage = () => {
   );
 };
 
-export default ProductsPage;
+export default ProductsPage4;
