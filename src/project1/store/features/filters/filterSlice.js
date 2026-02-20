@@ -1,20 +1,18 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  category: "all",
-  searchQuery: "",
+  category: 'all',
+  searchQuery: '',
   minPrice: null,
   maxPrice: null,
   minRating: 0,
-  sortBy: "default",
+  sortBy: 'default',
   page: 1,
   limit: 12,
-  // UI state
-  isSidebarOpen: false,
 };
 
-const filtersSlice = createSlice({
-  name: "filters",
+const filterSlice = createSlice({
+  name: 'filters',
   initialState,
   reducers: {
     setCategory: (state, action) => {
@@ -40,12 +38,7 @@ const filtersSlice = createSlice({
     setPage: (state, action) => {
       state.page = action.payload;
     },
-    toggleSidebar: (state) => {
-      state.isSidebarOpen = !state.isSidebarOpen;
-    },
-    resetFilters: () => {
-      return initialState;
-    },
+    resetFilters: () => initialState,
   },
 });
 
@@ -56,8 +49,7 @@ export const {
   setMinRating,
   setSortBy,
   setPage,
-  toggleSidebar,
   resetFilters,
-} = filtersSlice.actions;
+} = filterSlice.actions;
 
-export default filtersSlice.reducer;
+export default filterSlice.reducer;
